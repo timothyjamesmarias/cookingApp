@@ -25,7 +25,7 @@ Focus: offline-first ergonomics, AI-assisted creativity, and modular expansion.
 | Backend | Ktor + Exposed | GraalVM native image, low memory footprint           |
 | DI | Koin | Lightweight, KMP-compatible across frontend and backend |
 | Persistence | SQLDelight (frontend) / Exposed (backend) | Offline cache (SQLDelight), server DB (Exposed + PostgreSQL) |
-| AI | Local LLM (Ollama) / Cloud LLM | Structured JSON output, recipe parsing, semantic search |
+| AI | Cloud LLM (primary), local Ollama (optional/deferred) | Tiered: cloud for reasoning, local for extraction, deterministic where possible |
 
 ---
 
@@ -119,15 +119,26 @@ Focus: offline-first ergonomics, AI-assisted creativity, and modular expansion.
 - AI-assisted palette generation (via MCP or CLI)
 
 ### 4.2 AI / LLM Integration
-- Schema-based structured prompts with output conforming to shared Kotlin domain models
-- Local LLM option via Ollama on self-hosted NUC (Phi-3, Llama 3.1 8B quantized) for offline/low-cost operation
-- Ktor backend calls Ollama, validates structured JSON against shared Kotlin types, stores result
+
+Tiered approach — use the right tool for each job:
+
+**Tier 1: Cloud LLM** (conversational, knowledge-heavy tasks)
+- Cooking assistant Q&A, recipe adaptation (“make this vegan”), substitution reasoning, pairing suggestions
+- Ktor backend proxies calls to cloud provider (Claude, OpenAI, etc.), validates structured JSON against shared Kotlin types
+- Provider-agnostic interface: backend abstracts the LLM behind a service, frontend doesn't know or care which model is used
+
+**Tier 2: Local LLM** (optional, deferred until RAM budget allows)
+- Mechanical extraction tasks: recipe parsing from pasted text/URLs → structured JSON, ingredient categorization
+- Could run via Ollama on NUC if/when RAM is upgraded (currently 32GB, shared with other services)
+- Not needed at MVP — cloud model handles these tasks fine
+
+**Tier 3: No LLM needed** (deterministic)
+- Static substitution database, unit conversion, “what can I make” (DB query: pantry ∩ recipes), search/filtering
+
+Cross-cutting:
 - Caching for repeated requests
-- Semantic search via pgvector on PostgreSQL + embeddings from local model (“recipes with warm spices”, “something light for summer”)
-- Examples:
-    - “Make this vegan”
-    - “Suggest sides for roast chicken”
-    - “Explain this step in simpler terms”
+- Semantic search via pgvector on PostgreSQL + embeddings (“recipes with warm spices”, “something light for summer”)
+- Schema-based structured prompts with output conforming to shared Kotlin domain models
 
 ### 4.3 Sync & Backup (optional)
 - Use a sync library (e.g. PowerSync, ElectricSQL) rather than hand-rolling
