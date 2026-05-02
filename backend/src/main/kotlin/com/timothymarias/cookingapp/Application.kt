@@ -13,6 +13,7 @@ import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
@@ -54,6 +55,7 @@ fun Application.configurePlugins() {
         allowMethod(HttpMethod.Delete)
     }
     install(CallLogging)
+    install(Resources)
 }
 
 fun Application.configureRouting() {

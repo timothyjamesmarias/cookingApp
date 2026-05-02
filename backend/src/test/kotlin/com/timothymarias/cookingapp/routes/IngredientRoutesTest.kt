@@ -10,6 +10,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
@@ -31,6 +32,7 @@ class IngredientRoutesTest {
     private fun Application.testModule() {
         install(Koin) { modules(module { single { mockRepo } }) }
         install(ServerContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        install(Resources)
         install(StatusPages) {
             exception<IllegalArgumentException> { call, cause ->
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to (cause.message ?: "Bad request")))

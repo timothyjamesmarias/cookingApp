@@ -1,7 +1,24 @@
 package com.timothymarias.cookingapp.domain.api
 
-object ApiRoutes {
-    const val API_V1 = "/api/v1"
-    const val RECIPES = "$API_V1/recipes"
-    const val INGREDIENTS = "$API_V1/ingredients"
+import io.ktor.resources.*
+import kotlinx.serialization.Serializable
+
+@Serializable
+@Resource("/api/v1/recipes")
+class Recipes {
+    @Serializable
+    @Resource("{localId}")
+    data class ById(val parent: Recipes = Recipes(), val localId: String)
+}
+
+@Serializable
+@Resource("/api/v1/ingredients")
+class Ingredients {
+    @Serializable
+    @Resource("{localId}")
+    data class ById(val parent: Ingredients = Ingredients(), val localId: String)
+
+    @Serializable
+    @Resource("search")
+    data class Search(val parent: Ingredients = Ingredients(), val q: String = "")
 }
