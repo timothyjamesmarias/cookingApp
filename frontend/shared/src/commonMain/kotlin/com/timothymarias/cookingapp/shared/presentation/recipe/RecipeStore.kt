@@ -2,8 +2,8 @@ package com.timothymarias.cookingapp.shared.presentation.recipe
 
 import com.timothymarias.cookingapp.shared.data.repository.quantity.QuantityRepository
 import com.timothymarias.cookingapp.shared.data.repository.recipe.RecipeRepository
-import com.timothymarias.cookingapp.shared.domain.model.Quantity
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Quantity
+import com.timothymarias.cookingapp.domain.model.Recipe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

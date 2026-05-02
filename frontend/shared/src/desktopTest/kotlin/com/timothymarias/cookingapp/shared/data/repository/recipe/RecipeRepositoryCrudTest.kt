@@ -3,7 +3,7 @@ package com.timothymarias.cookingapp.shared.data.repository.recipe
 import app.cash.turbine.test
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.timothymarias.cookingapp.shared.db.CookingDatabase
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Recipe
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -1,7 +1,7 @@
 package com.timothymarias.cookingapp.shared.data.repository.unit
 
-import com.timothymarias.cookingapp.shared.domain.model.MeasurementType
-import com.timothymarias.cookingapp.shared.domain.model.Unit
+import com.timothymarias.cookingapp.domain.model.MeasurementType
+import com.timothymarias.cookingapp.domain.model.Unit
 import kotlinx.coroutines.flow.Flow
 
 /**

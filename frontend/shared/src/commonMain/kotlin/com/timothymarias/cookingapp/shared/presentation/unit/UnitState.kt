@@ -1,6 +1,6 @@
 package com.timothymarias.cookingapp.shared.presentation.unit
 
-import com.timothymarias.cookingapp.shared.domain.model.Unit
+import com.timothymarias.cookingapp.domain.model.Unit
 
 /**
  * UI state for Unit management.

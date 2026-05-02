@@ -1,7 +1,7 @@
 package com.timothymarias.cookingapp.shared.presentation.recipe
 
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Ingredient
 
 /**
  * Represents quantity information for an ingredient in a recipe.

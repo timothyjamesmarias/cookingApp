@@ -14,6 +14,7 @@ kotlin {
         desktopMain.dependencies {
             implementation(project(":frontend:shared"))
             implementation(compose.desktop.currentOs)
+            implementation("io.insert-koin:koin-core:4.1.0")
         }
     }
 }

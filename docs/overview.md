@@ -21,10 +21,11 @@ Focus: offline-first ergonomics, AI-assisted creativity, and modular expansion.
 | Layer | Technology | Notes                                               |
 |-------|-------------|-----------------------------------------------------|
 | UI | Compose Multiplatform (Desktop + Mobile) | Native-first, shared code                           |
-| Shared Logic | Kotlin Multiplatform shared module | Recipes, pantry logic, conversions                  |
-| Backend | Spring Boot | LLM orchestration, sync, semantic search, api layer |
-| Persistence | SQLDelight / Room | Offline cache and state                             |
-| AI | OpenAI API / Local LLM | Structured JSON prompts, caching                    |
+| Shared Logic | Kotlin Multiplatform shared module | Domain models, repositories, conversions — used by frontend and backend |
+| Backend | Ktor + Exposed | GraalVM native image, low memory footprint           |
+| DI | Koin | Lightweight, KMP-compatible across frontend and backend |
+| Persistence | SQLDelight (frontend) / Exposed (backend) | Offline cache (SQLDelight), server DB (Exposed + PostgreSQL) |
+| AI | Cloud LLM (primary), local Ollama (optional/deferred) | Tiered: cloud for reasoning, local for extraction, deterministic where possible |
 
 ---
 
@@ -35,10 +36,11 @@ Focus: offline-first ergonomics, AI-assisted creativity, and modular expansion.
 
 - CRUD for recipes (title, ingredients, steps, tags)
 - Recipe parsing (text → structured format via LLM)
-- Import from websites or plaintext
+- Import from websites or plaintext (URL paste → LLM extraction → review → save)
 - Scaling (serving size adjustment)
 - Image attachments
 - Favorite and tag system
+- Unit conversion engine (shared module): grams ↔ oz, ml ↔ cups, etc. — reused across recipes, pantry, and shopping lists
 
 ---
 
@@ -117,17 +119,30 @@ Focus: offline-first ergonomics, AI-assisted creativity, and modular expansion.
 - AI-assisted palette generation (via MCP or CLI)
 
 ### 4.2 AI / LLM Integration
-- Schema-based structured prompts
-- Use backend as proxy for LLM calls
+
+Tiered approach — use the right tool for each job:
+
+**Tier 1: Cloud LLM** (conversational, knowledge-heavy tasks)
+- Cooking assistant Q&A, recipe adaptation (“make this vegan”), substitution reasoning, pairing suggestions
+- Ktor backend proxies calls to cloud provider (Claude, OpenAI, etc.), validates structured JSON against shared Kotlin types
+- Provider-agnostic interface: backend abstracts the LLM behind a service, frontend doesn't know or care which model is used
+
+**Tier 2: Local LLM** (optional, deferred until RAM budget allows)
+- Mechanical extraction tasks: recipe parsing from pasted text/URLs → structured JSON, ingredient categorization
+- Could run via Ollama on NUC if/when RAM is upgraded (currently 32GB, shared with other services)
+- Not needed at MVP — cloud model handles these tasks fine
+
+**Tier 3: No LLM needed** (deterministic)
+- Static substitution database, unit conversion, “what can I make” (DB query: pantry ∩ recipes), search/filtering
+
+Cross-cutting:
 - Caching for repeated requests
-- Examples:
-    - “Make this vegan”
-    - “Suggest sides for roast chicken”
-    - “Explain this step in simpler terms”
+- Semantic search via pgvector on PostgreSQL + embeddings (“recipes with warm spices”, “something light for summer”)
+- Schema-based structured prompts with output conforming to shared Kotlin domain models
 
 ### 4.3 Sync & Backup (optional)
-- Cloud sync via Spring Boot API
-- Local-first data model with background merging
+- Use a sync library (e.g. PowerSync, ElectricSQL) rather than hand-rolling
+- Local-first data model; sync sits below the repository layer (stores/screens don't know about it)
 - JSON export/import for user data
 
 ---
@@ -164,13 +179,14 @@ Stretch goals:
 
 ## 7. Development Priorities
 
-1. Shared data model & serialization schema
-2. Compose UI foundation + theme
-3. Recipe & pantry core logic
-4. Offline DB + LLM integration
-5. MVP release for personal daily use
-6. Polish + design iterations
-7. Evaluate productization potential
+1. Migrate backend: Spring Boot → Ktor + Exposed (GraalVM native image target)
+2. Shared KMP domain models used by both frontend (SQLDelight) and backend (Exposed)
+3. Introduce Koin for DI across frontend and backend
+4. Recipe & pantry core logic
+5. LLM integration (local Ollama + structured output pipeline)
+6. Sync via library (below repository layer)
+7. MVP release for personal daily use
+8. Polish + design iterations
 
 ---
 
@@ -184,4 +200,4 @@ Stretch goals:
 
 ---
 
-*Document version: 2025-10-12*
+*Document version: 2026-05-01*

@@ -1,6 +1,6 @@
 package com.timothymarias.cookingapp.shared.presentation.ingredient
 
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.Ingredient
 
 data class IngredientState(
     val items: List<Ingredient> = emptyList(),

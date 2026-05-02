@@ -1,7 +1,7 @@
 package com.timothymarias.cookingapp.shared.data.repository.recipe
 
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.Recipe
 import kotlinx.coroutines.flow.Flow
 
 /**

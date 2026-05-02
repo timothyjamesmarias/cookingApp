@@ -10,8 +10,9 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
 }
 
-rootProject.name = "cooking_app"
+rootProject.name = "cookingApp"
 
+include(":shared:domain")
 include(":backend")
 include(":frontend:shared")
 include(":frontend:android")

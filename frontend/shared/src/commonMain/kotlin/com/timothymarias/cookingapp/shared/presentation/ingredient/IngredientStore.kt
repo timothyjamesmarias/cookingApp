@@ -1,7 +1,7 @@
 package com.timothymarias.cookingapp.shared.presentation.ingredient
 
 import com.timothymarias.cookingapp.shared.data.repository.ingredient.IngredientRepository
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.Ingredient
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

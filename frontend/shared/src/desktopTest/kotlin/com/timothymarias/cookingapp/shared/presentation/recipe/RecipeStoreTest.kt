@@ -5,7 +5,7 @@ import app.cash.turbine.test
 import com.timothymarias.cookingapp.shared.data.repository.recipe.DbRecipeRepository
 import com.timothymarias.cookingapp.shared.data.repository.quantity.DbQuantityRepository
 import com.timothymarias.cookingapp.shared.db.CookingDatabase
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Recipe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay

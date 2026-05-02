@@ -1,6 +1,6 @@
 package com.timothymarias.cookingapp.shared.data.repository.quantity
 
-import com.timothymarias.cookingapp.shared.domain.model.Quantity
+import com.timothymarias.cookingapp.domain.model.Quantity
 import kotlinx.coroutines.flow.Flow
 
 /**

@@ -171,7 +171,7 @@ private fun RecipeDetailTopBar(
 
 @Composable
 private fun RecipeNameSection(
-    recipe: com.timothymarias.cookingapp.shared.domain.model.Recipe,
+    recipe: com.timothymarias.cookingapp.domain.model.Recipe,
     isEditMode: Boolean,
     onUpdate: (String) -> Unit
 ) {

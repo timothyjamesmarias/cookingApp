@@ -4,7 +4,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.timothymarias.cookingapp.shared.data.repository.recipe.DbRecipeRepository
 import com.timothymarias.cookingapp.shared.data.repository.quantity.DbQuantityRepository
 import com.timothymarias.cookingapp.shared.db.CookingDatabase
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Recipe
 import com.timothymarias.cookingapp.shared.presentation.recipe.list.RecipeListScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
