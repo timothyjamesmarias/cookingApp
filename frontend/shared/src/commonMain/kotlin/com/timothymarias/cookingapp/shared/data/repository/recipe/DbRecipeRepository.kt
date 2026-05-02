@@ -4,8 +4,8 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.timothymarias.cookingapp.shared.db.CookingDatabase
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.Recipe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

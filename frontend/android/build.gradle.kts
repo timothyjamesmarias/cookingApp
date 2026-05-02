@@ -13,6 +13,7 @@ kotlin {
         androidMain.dependencies {
             implementation(project(":frontend:shared"))
             implementation("androidx.activity:activity-compose:1.10.1")
+            implementation("io.insert-koin:koin-core:4.1.0")
         }
     }
 }

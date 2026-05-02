@@ -12,6 +12,7 @@ plugins {
 
 rootProject.name = "cooking_app"
 
+include(":shared:domain")
 include(":backend")
 include(":frontend:shared")
 include(":frontend:android")

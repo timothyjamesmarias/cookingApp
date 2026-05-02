@@ -4,7 +4,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.cash.turbine.test
 import com.timothymarias.cookingapp.shared.data.repository.ingredient.DbIngredientRepository
 import com.timothymarias.cookingapp.shared.db.CookingDatabase
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.Ingredient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay

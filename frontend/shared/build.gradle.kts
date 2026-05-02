@@ -22,6 +22,7 @@ kotlin {
     sourceSets { 
         val commonMain by getting {
             dependencies {
+                implementation(project(":shared:domain"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
@@ -34,6 +35,7 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.3")
                 implementation("io.ktor:ktor-client-logging:3.3.3")
                 implementation("app.softwork:kotlinx-uuid-core:0.0.22")
+                implementation("io.insert-koin:koin-core:4.1.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
 
                 // SQLDelight common runtime + coroutines extensions

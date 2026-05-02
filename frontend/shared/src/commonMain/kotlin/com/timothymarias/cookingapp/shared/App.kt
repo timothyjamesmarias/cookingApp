@@ -4,21 +4,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import com.timothymarias.cookingapp.shared.presentation.app.AppRoot
 import com.timothymarias.cookingapp.shared.presentation.app.AppState
-import com.timothymarias.cookingapp.shared.presentation.app.Screen
 import com.timothymarias.cookingapp.shared.presentation.ingredient.IngredientStore
 import com.timothymarias.cookingapp.shared.presentation.recipe.RecipeStore
 import com.timothymarias.cookingapp.shared.presentation.unit.UnitStore
+import org.koin.mp.KoinPlatform.getKoin
 
 @Composable
 fun App() {
-    val recipeRepo = remember { ServiceLocator.recipeRepository }
-    val ingredientRepo = remember { ServiceLocator.ingredientRepository }
-    val unitRepo = remember { ServiceLocator.unitRepository }
-    val quantityRepo = remember { ServiceLocator.quantityRepository }
-
-    val recipeStore = remember { RecipeStore(recipeRepo, quantityRepo) }
-    val ingredientStore = remember { IngredientStore(ingredientRepo) }
-    val unitStore = remember { UnitStore(unitRepo) }
+    val koin = remember { getKoin() }
+    val recipeStore = remember { koin.get<RecipeStore>() }
+    val ingredientStore = remember { koin.get<IngredientStore>() }
+    val unitStore = remember { koin.get<UnitStore>() }
 
     var appState by remember { mutableStateOf(AppState()) }
 

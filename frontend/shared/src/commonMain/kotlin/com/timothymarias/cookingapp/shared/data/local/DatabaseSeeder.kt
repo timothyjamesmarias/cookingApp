@@ -4,10 +4,10 @@ import com.timothymarias.cookingapp.shared.data.repository.ingredient.Ingredient
 import com.timothymarias.cookingapp.shared.data.repository.recipe.RecipeRepository
 import com.timothymarias.cookingapp.shared.data.repository.unit.UnitRepository
 import com.timothymarias.cookingapp.shared.db.CookingDatabase
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
-import com.timothymarias.cookingapp.shared.domain.model.MeasurementType
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
-import com.timothymarias.cookingapp.shared.domain.model.Unit
+import com.timothymarias.cookingapp.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.MeasurementType
+import com.timothymarias.cookingapp.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Unit
 import kotlinx.datetime.Clock
 import kotlinx.uuid.UUID
 import kotlinx.uuid.generateUUID

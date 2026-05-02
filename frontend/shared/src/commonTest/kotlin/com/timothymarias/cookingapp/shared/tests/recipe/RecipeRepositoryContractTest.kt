@@ -1,7 +1,7 @@
 package com.timothymarias.cookingapp.shared.tests.recipe
 
 import com.timothymarias.cookingapp.shared.data.repository.recipe.RecipeRepository
-import com.timothymarias.cookingapp.shared.domain.model.Recipe
+import com.timothymarias.cookingapp.domain.model.Recipe
 import kotlin.test.Ignore
 import kotlin.test.Test
 

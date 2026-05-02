@@ -2,7 +2,7 @@ package com.timothymarias.cookingapp.shared.data.repository.ingredient
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.timothymarias.cookingapp.shared.db.CookingDatabase
-import com.timothymarias.cookingapp.shared.domain.model.Ingredient
+import com.timothymarias.cookingapp.domain.model.Ingredient
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
