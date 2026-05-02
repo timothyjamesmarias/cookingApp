@@ -12,7 +12,7 @@ plugins {
 
 group = "com.timothymarias"
 version = "0.0.1-SNAPSHOT"
-description = "cooking-app"
+description = "cookingApp"
 
 allprojects {
     repositories {
