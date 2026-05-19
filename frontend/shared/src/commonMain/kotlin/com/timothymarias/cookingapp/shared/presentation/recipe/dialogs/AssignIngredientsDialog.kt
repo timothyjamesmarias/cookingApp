@@ -38,12 +38,13 @@ fun AssignIngredientsDialog(
     onRecipeAction: (RecipeAction) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val hasQuery = ingredientState.query.isNotBlank()
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Assign Ingredients") },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Search field - fixed at top
                 IngredientSearchField(
                     query = ingredientState.query,
                     onQueryChange = { onIngredientAction(IngredientAction.QueryChanged(it)) }
@@ -51,30 +52,23 @@ fun AssignIngredientsDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Ingredient list area - flexible height that adapts to available space
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f) // Takes available space
-                        .heightIn(min = 200.dp, max = 400.dp), // Flexible but bounded
+                        .weight(1f)
+                        .heightIn(min = 200.dp, max = 400.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     if (ingredientState.items.isEmpty()) {
-                        val message = if (ingredientState.query.isNotEmpty()) {
-                            "No ingredients found for \"${ingredientState.query}\""
-                        } else {
-                            "No ingredients yet."
-                        }
+                        val message = if (hasQuery) "No ingredients found for \"${ingredientState.query}\""
+                                      else "No ingredients yet."
                         Text(
                             text = message,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     } else {
-                        // Only the list scrolls, not the whole column
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(
                                 items = ingredientState.items,
                                 key = { it.localId }
@@ -87,14 +81,13 @@ fun AssignIngredientsDialog(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(ing.name)
+                                    val isAssigned = recipeState.assignedIngredientIds.contains(ing.localId)
                                     Checkbox(
-                                        checked = recipeState.assignedIngredientIds.contains(ing.localId),
+                                        checked = isAssigned,
                                         onCheckedChange = { checked ->
-                                            if (checked) {
-                                                onRecipeAction(RecipeAction.AssignIngredient(recipeId, ing.localId))
-                                            } else {
-                                                onRecipeAction(RecipeAction.RemoveIngredient(recipeId, ing.localId))
-                                            }
+                                            val action = if (checked) RecipeAction.AssignIngredient(recipeId, ing.localId)
+                                                         else RecipeAction.RemoveIngredient(recipeId, ing.localId)
+                                            onRecipeAction(action)
                                         }
                                     )
                                 }
@@ -107,21 +100,16 @@ fun AssignIngredientsDialog(
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Create button - fixed at bottom, always visible
-                val buttonText = if (ingredientState.query.isNotEmpty()) {
-                    "Create \"${ingredientState.query}\""
-                } else {
-                    "Create New Ingredient"
-                }
+                val buttonText = if (hasQuery) "Create \"${ingredientState.query}\"" else "Create New Ingredient"
 
                 OutlinedButton(
                     onClick = {
-                        val name = ingredientState.query.ifBlank { return@OutlinedButton }
-                        onIngredientAction(IngredientAction.Create(name))
+                        if (!hasQuery) return@OutlinedButton
+                        onIngredientAction(IngredientAction.Create(ingredientState.query))
                         onIngredientAction(IngredientAction.QueryChanged(""))
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = ingredientState.query.isNotBlank()
+                    enabled = hasQuery
                 ) {
                     Text(buttonText)
                 }

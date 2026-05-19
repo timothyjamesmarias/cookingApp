@@ -5,8 +5,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.timothymarias.cookingapp.shared.presentation.recipe.RecipeAction
 import com.timothymarias.cookingapp.shared.presentation.unit.UnitState
+
+fun parseValidAmount(text: String): Double? {
+    val value = text.toDoubleOrNull() ?: return null
+    if (value <= 0) return null
+    return value
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +28,6 @@ fun EditIngredientQuantityDialog(
     var selectedUnitId by remember { mutableStateOf<String?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
-    // Initialize with first unit if available
     LaunchedEffect(unitState.items) {
         if (selectedUnitId == null && unitState.items.isNotEmpty()) {
             selectedUnitId = unitState.items.first().localId
@@ -31,9 +35,8 @@ fun EditIngredientQuantityDialog(
     }
 
     val selectedUnit = unitState.items.firstOrNull { it.localId == selectedUnitId }
-    val isValid = amountText.toDoubleOrNull() != null &&
-                  amountText.toDoubleOrNull()?.let { it > 0 } == true &&
-                  selectedUnitId != null
+    val parsedAmount = parseValidAmount(amountText)
+    val isValid = parsedAmount != null && selectedUnitId != null
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -43,7 +46,6 @@ fun EditIngredientQuantityDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Amount input
                 OutlinedTextField(
                     value = amountText,
                     onValueChange = { amountText = it },
@@ -54,13 +56,13 @@ fun EditIngredientQuantityDialog(
                     isError = amountText.isNotEmpty() && amountText.toDoubleOrNull() == null
                 )
 
-                // Unit dropdown
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
                 ) {
+                    val displayText = if (selectedUnit != null) "${selectedUnit.name} (${selectedUnit.symbol})" else "Select unit"
                     OutlinedTextField(
-                        value = selectedUnit?.let { "${it.name} (${it.symbol})" } ?: "Select unit",
+                        value = displayText,
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Unit") },
@@ -97,10 +99,7 @@ fun EditIngredientQuantityDialog(
             }
         },
         confirmButton = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Clear button (removes quantity)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = {
                     onClear()
                     onDismiss()
@@ -108,15 +107,12 @@ fun EditIngredientQuantityDialog(
                     Text("Clear")
                 }
 
-                // Save button
                 Button(
                     onClick = {
-                        val amount = amountText.toDoubleOrNull()
-                        val unitId = selectedUnitId
-                        if (amount != null && unitId != null) {
-                            onSave(amount, unitId)
-                            onDismiss()
-                        }
+                        val amount = parsedAmount ?: return@Button
+                        val unitId = selectedUnitId ?: return@Button
+                        onSave(amount, unitId)
+                        onDismiss()
                     },
                     enabled = isValid
                 ) {

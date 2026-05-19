@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -66,23 +65,19 @@ fun AppRoot(
                 Screen.IngredientList -> IngredientListScreen(ingredientStore)
             }
         }
-
-        recipeState.managingIngredientsId?.let { recipeId ->
-            AssignIngredientsDialog(
-                recipeId = recipeId,
-                ingredientState = ingredientState,
-                recipeState = recipeState,
-                onIngredientAction = { action ->
-                    ingredientStore.dispatch(action)
-                },
-                onRecipeAction = { action ->
-                    recipeStore.dispatch(action)
-                },
-                onDismiss = {
-                    ingredientStore.dispatch(IngredientAction.QueryChanged(""))
-                    recipeStore.dispatch(RecipeAction.EditClose)
-                }
-            )
-        }
     }
+
+    val managingRecipeId = recipeState.managingIngredientsId ?: return
+
+    AssignIngredientsDialog(
+        recipeId = managingRecipeId,
+        ingredientState = ingredientState,
+        recipeState = recipeState,
+        onIngredientAction = { ingredientStore.dispatch(it) },
+        onRecipeAction = { recipeStore.dispatch(it) },
+        onDismiss = {
+            ingredientStore.dispatch(IngredientAction.QueryChanged(""))
+            recipeStore.dispatch(RecipeAction.EditClose)
+        }
+    )
 }
