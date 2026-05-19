@@ -13,24 +13,25 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 class RecipeRepository {
 
     suspend fun findAll(): List<RecipeResponse> = dbQuery {
-        val recipes = Recipes.selectAll().map { row ->
-            row[Recipes.localId] to row[Recipes.name]
-        }
-        recipes.map { (localId, name) ->
-            RecipeResponse(localId = localId, name = name, ingredients = findIngredientsByRecipeLocalId(localId))
+        Recipes.selectAll().map { row ->
+            val localId = row[Recipes.localId]
+            RecipeResponse(
+                localId = localId,
+                name = row[Recipes.name],
+                ingredients = findIngredientsByRecipeLocalId(localId)
+            )
         }
     }
 
     suspend fun findByLocalId(localId: String): RecipeResponse? = dbQuery {
-        Recipes.selectAll().where { Recipes.localId eq localId }
-            .singleOrNull()
-            ?.let { row ->
-                RecipeResponse(
-                    localId = row[Recipes.localId],
-                    name = row[Recipes.name],
-                    ingredients = findIngredientsByRecipeLocalId(localId)
-                )
-            }
+        val row = Recipes.selectAll().where { Recipes.localId eq localId }
+            .singleOrNull() ?: return@dbQuery null
+
+        RecipeResponse(
+            localId = row[Recipes.localId],
+            name = row[Recipes.name],
+            ingredients = findIngredientsByRecipeLocalId(localId)
+        )
     }
 
     suspend fun create(request: CreateRecipeRequest): RecipeResponse = dbQuery {
@@ -45,8 +46,7 @@ class RecipeRepository {
     }
 
     suspend fun update(localId: String, request: UpdateRecipeRequest): RecipeResponse? = dbQuery {
-        val recipeId = Recipes.selectAll().where { Recipes.localId eq localId }
-            .singleOrNull()?.get(Recipes.id) ?: return@dbQuery null
+        val recipeId = lookupRecipeId(localId) ?: return@dbQuery null
 
         Recipes.update({ Recipes.localId eq localId }) {
             it[name] = request.name
@@ -59,16 +59,18 @@ class RecipeRepository {
     }
 
     suspend fun delete(localId: String): Boolean = dbQuery {
-        val recipeId = Recipes.selectAll().where { Recipes.localId eq localId }
-            .singleOrNull()?.get(Recipes.id) ?: return@dbQuery false
+        val recipeId = lookupRecipeId(localId) ?: return@dbQuery false
 
         RecipeIngredients.deleteWhere { RecipeIngredients.recipeId eq recipeId }
         Recipes.deleteWhere { Recipes.localId eq localId } > 0
     }
 
+    private fun lookupRecipeId(localId: String): Long? =
+        Recipes.selectAll().where { Recipes.localId eq localId }
+            .singleOrNull()?.get(Recipes.id)
+
     private fun findIngredientsByRecipeLocalId(recipeLocalId: String): List<Ingredient> {
-        val recipeId = Recipes.selectAll().where { Recipes.localId eq recipeLocalId }
-            .singleOrNull()?.get(Recipes.id) ?: return emptyList()
+        val recipeId = lookupRecipeId(recipeLocalId) ?: return emptyList()
 
         return (RecipeIngredients innerJoin Ingredients)
             .selectAll().where { RecipeIngredients.recipeId eq recipeId }
