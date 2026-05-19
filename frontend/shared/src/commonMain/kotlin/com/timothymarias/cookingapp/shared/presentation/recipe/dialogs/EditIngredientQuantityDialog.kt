@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.timothymarias.cookingapp.shared.presentation.components.UnitDropdown
 import com.timothymarias.cookingapp.shared.presentation.unit.UnitState
 
 fun parseValidAmount(text: String): Double? {
@@ -13,7 +14,6 @@ fun parseValidAmount(text: String): Double? {
     return value
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditIngredientQuantityDialog(
     recipeId: String,
@@ -26,7 +26,6 @@ fun EditIngredientQuantityDialog(
 ) {
     var amountText by remember { mutableStateOf("") }
     var selectedUnitId by remember { mutableStateOf<String?>(null) }
-    var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(unitState.items) {
         if (selectedUnitId == null && unitState.items.isNotEmpty()) {
@@ -56,38 +55,11 @@ fun EditIngredientQuantityDialog(
                     isError = amountText.isNotEmpty() && amountText.toDoubleOrNull() == null
                 )
 
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    val displayText = if (selectedUnit != null) "${selectedUnit.name} (${selectedUnit.symbol})" else "Select unit"
-                    OutlinedTextField(
-                        value = displayText,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Unit") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        unitState.items.forEach { unit ->
-                            DropdownMenuItem(
-                                text = { Text("${unit.name} (${unit.symbol})") },
-                                onClick = {
-                                    selectedUnitId = unit.localId
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+                UnitDropdown(
+                    units = unitState.items,
+                    selectedUnit = selectedUnit,
+                    onUnitSelected = { selectedUnitId = it.localId }
+                )
 
                 if (unitState.items.isEmpty()) {
                     Text(
@@ -121,9 +93,7 @@ fun EditIngredientQuantityDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }

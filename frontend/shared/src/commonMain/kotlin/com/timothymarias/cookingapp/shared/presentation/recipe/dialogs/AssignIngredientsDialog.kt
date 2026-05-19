@@ -23,9 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.timothymarias.cookingapp.domain.model.Ingredient
+import com.timothymarias.cookingapp.shared.presentation.components.SearchField
 import com.timothymarias.cookingapp.shared.presentation.ingredient.IngredientAction
 import com.timothymarias.cookingapp.shared.presentation.ingredient.IngredientState
-import com.timothymarias.cookingapp.shared.presentation.ingredient.components.IngredientSearchField
 import com.timothymarias.cookingapp.shared.presentation.recipe.RecipeAction
 import com.timothymarias.cookingapp.shared.presentation.recipe.RecipeState
 
@@ -45,78 +46,116 @@ fun AssignIngredientsDialog(
         title = { Text("Assign Ingredients") },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                IngredientSearchField(
+                SearchField(
                     query = ingredientState.query,
-                    onQueryChange = { onIngredientAction(IngredientAction.QueryChanged(it)) }
+                    onQueryChange = { onIngredientAction(IngredientAction.QueryChanged(it)) },
+                    placeholder = "Search ingredients..."
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .heightIn(min = 200.dp, max = 400.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (ingredientState.items.isEmpty()) {
-                        val message = if (hasQuery) "No ingredients found for \"${ingredientState.query}\""
-                                      else "No ingredients yet."
-                        Text(
-                            text = message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(
-                                items = ingredientState.items,
-                                key = { it.localId }
-                            ) { ing ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(ing.name)
-                                    val isAssigned = recipeState.assignedIngredientIds.contains(ing.localId)
-                                    Checkbox(
-                                        checked = isAssigned,
-                                        onCheckedChange = { checked ->
-                                            val action = if (checked) RecipeAction.AssignIngredient(recipeId, ing.localId)
-                                                         else RecipeAction.RemoveIngredient(recipeId, ing.localId)
-                                            onRecipeAction(action)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                IngredientChecklistArea(
+                    ingredients = ingredientState.items,
+                    assignedIds = recipeState.assignedIngredientIds,
+                    query = ingredientState.query,
+                    hasQuery = hasQuery,
+                    recipeId = recipeId,
+                    onRecipeAction = onRecipeAction
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val buttonText = if (hasQuery) "Create \"${ingredientState.query}\"" else "Create New Ingredient"
-
-                OutlinedButton(
-                    onClick = {
-                        if (!hasQuery) return@OutlinedButton
-                        onIngredientAction(IngredientAction.Create(ingredientState.query))
-                        onIngredientAction(IngredientAction.QueryChanged(""))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = hasQuery
-                ) {
-                    Text(buttonText)
-                }
+                CreateIngredientButton(
+                    hasQuery = hasQuery,
+                    query = ingredientState.query,
+                    onIngredientAction = onIngredientAction
+                )
             }
         },
         confirmButton = {
             Button(onClick = onDismiss) { Text("Done") }
         }
     )
+}
+
+@Composable
+private fun IngredientChecklistArea(
+    ingredients: List<Ingredient>,
+    assignedIds: Set<String>,
+    query: String,
+    hasQuery: Boolean,
+    recipeId: String,
+    onRecipeAction: (RecipeAction) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 200.dp, max = 400.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (ingredients.isEmpty()) {
+            val message = if (hasQuery) "No ingredients found for \"$query\"" else "No ingredients yet."
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            return@Box
+        }
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(items = ingredients, key = { it.localId }) { ingredient ->
+                IngredientChecklistItem(
+                    ingredient = ingredient,
+                    isAssigned = assignedIds.contains(ingredient.localId),
+                    onToggle = { checked ->
+                        val action = if (checked) RecipeAction.AssignIngredient(recipeId, ingredient.localId)
+                                     else RecipeAction.RemoveIngredient(recipeId, ingredient.localId)
+                        onRecipeAction(action)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun IngredientChecklistItem(
+    ingredient: Ingredient,
+    isAssigned: Boolean,
+    onToggle: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(ingredient.name)
+        Checkbox(checked = isAssigned, onCheckedChange = onToggle)
+    }
+}
+
+@Composable
+private fun CreateIngredientButton(
+    hasQuery: Boolean,
+    query: String,
+    onIngredientAction: (IngredientAction) -> Unit,
+) {
+    val buttonText = if (hasQuery) "Create \"$query\"" else "Create New Ingredient"
+
+    OutlinedButton(
+        onClick = {
+            if (!hasQuery) return@OutlinedButton
+            onIngredientAction(IngredientAction.Create(query))
+            onIngredientAction(IngredientAction.QueryChanged(""))
+        },
+        modifier = Modifier.fillMaxWidth(),
+        enabled = hasQuery
+    ) {
+        Text(buttonText)
+    }
 }

@@ -10,11 +10,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.timothymarias.cookingapp.domain.model.Ingredient
+import com.timothymarias.cookingapp.shared.presentation.components.SectionCard
 import com.timothymarias.cookingapp.shared.presentation.recipe.QuantityInfo
 import com.timothymarias.cookingapp.shared.presentation.recipe.RecipeAction
 import com.timothymarias.cookingapp.shared.presentation.recipe.RecipeState
@@ -64,7 +64,7 @@ fun RecipeDetailScreen(
         ) {
             item {
                 RecipeNameSection(
-                    recipe = recipe,
+                    recipeName = recipe.name,
                     isEditMode = isEditMode,
                     onUpdate = { recipeStore.dispatch(RecipeAction.Rename(recipe.localId, it)) }
                 )
@@ -83,16 +83,19 @@ fun RecipeDetailScreen(
             }
 
             item {
-                PlaceholderSection(title = "Steps", emptyMessage = "No steps added yet", actionLabel = "Add Step", isEditMode = isEditMode)
+                SectionCard(title = "Steps") {
+                    EmptyHint("No steps added yet")
+                }
             }
 
             item {
-                PlaceholderSection(title = "Tags", emptyMessage = "No tags added yet", actionLabel = "Add Tag", isEditMode = isEditMode)
+                SectionCard(title = "Tags") {
+                    EmptyHint("No tags added yet")
+                }
             }
         }
     }
 
-    // Edit Quantity Dialog
     val editingIngredientId = recipeState.editingQuantityIngredientId ?: return
     val editingIngredient = ingredientState.items.firstOrNull { it.localId == editingIngredientId } ?: return
 
@@ -142,47 +145,28 @@ private fun RecipeDetailTopBar(
 
 @Composable
 private fun RecipeNameSection(
-    recipe: com.timothymarias.cookingapp.domain.model.Recipe,
+    recipeName: String,
     isEditMode: Boolean,
     onUpdate: (String) -> Unit
 ) {
-    Card {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(text = "Recipe Details", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (isEditMode) {
-                RecipeNameEdit(name = recipe.name, onUpdate = onUpdate)
-                return@Column
-            }
-
-            RecipeNameView(name = recipe.name)
+    SectionCard(title = "Recipe Details") {
+        if (isEditMode) {
+            OutlinedTextField(
+                value = recipeName,
+                onValueChange = onUpdate,
+                label = { Text("Recipe Name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            return@SectionCard
         }
+
+        Text(
+            text = recipeName,
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
-}
-
-@Composable
-private fun RecipeNameView(name: String) {
-    Text(
-        text = name,
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-private fun RecipeNameEdit(name: String, onUpdate: (String) -> Unit) {
-    OutlinedTextField(
-        value = name,
-        onValueChange = onUpdate,
-        label = { Text("Recipe Name") },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true
-    )
 }
 
 @Composable
@@ -197,71 +181,41 @@ private fun IngredientsSection(
 ) {
     var showAssignDialog by remember { mutableStateOf(false) }
 
-    Card {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            IngredientsSectionHeader(
-                isEditMode = isEditMode,
-                onAddClick = {
-                    recipeStore.dispatch(RecipeAction.ManageIngredientsOpen(recipeId))
-                    showAssignDialog = true
-                }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            IngredientsList(
-                recipeId = recipeId,
-                recipeState = recipeState,
-                ingredientItems = ingredientItems,
-                unitItems = unitState.items,
-                isEditMode = isEditMode,
-                onEditQuantity = { ingredientId ->
-                    recipeStore.dispatch(RecipeAction.OpenQuantityEditor(ingredientId))
-                },
-                onRemove = { ingredientId ->
-                    recipeStore.dispatch(RecipeAction.RemoveIngredient(recipeId, ingredientId))
-                }
-            )
-
-            if (isEditMode && showAssignDialog) {
-                val ingredientState by ingredientStore.state.collectAsState()
-                AssignIngredientsDialog(
-                    recipeId = recipeId,
-                    ingredientState = ingredientState,
-                    recipeState = recipeState,
-                    onIngredientAction = { ingredientStore.dispatch(it) },
-                    onRecipeAction = { recipeStore.dispatch(it) },
-                    onDismiss = {
-                        showAssignDialog = false
-                        ingredientStore.dispatch(IngredientAction.QueryChanged(""))
-                        recipeStore.dispatch(RecipeAction.EditClose)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun IngredientsSectionHeader(
-    isEditMode: Boolean,
-    onAddClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = "Ingredients", style = MaterialTheme.typography.titleLarge)
-
-        if (isEditMode) {
-            IconButton(onClick = onAddClick) {
+    val addButton: @Composable (() -> Unit)? = if (isEditMode) {
+        {
+            IconButton(onClick = {
+                recipeStore.dispatch(RecipeAction.ManageIngredientsOpen(recipeId))
+                showAssignDialog = true
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Ingredient")
             }
+        }
+    } else null
+
+    SectionCard(title = "Ingredients", headerAction = addButton) {
+        IngredientsList(
+            recipeState = recipeState,
+            ingredientItems = ingredientItems,
+            unitItems = unitState.items,
+            isEditMode = isEditMode,
+            onEditQuantity = { recipeStore.dispatch(RecipeAction.OpenQuantityEditor(it)) },
+            onRemove = { recipeStore.dispatch(RecipeAction.RemoveIngredient(recipeId, it)) }
+        )
+
+        if (isEditMode && showAssignDialog) {
+            val ingredientState by ingredientStore.state.collectAsState()
+            AssignIngredientsDialog(
+                recipeId = recipeId,
+                ingredientState = ingredientState,
+                recipeState = recipeState,
+                onIngredientAction = { ingredientStore.dispatch(it) },
+                onRecipeAction = { recipeStore.dispatch(it) },
+                onDismiss = {
+                    showAssignDialog = false
+                    ingredientStore.dispatch(IngredientAction.QueryChanged(""))
+                    recipeStore.dispatch(RecipeAction.EditClose)
+                }
+            )
         }
     }
 }
@@ -278,7 +232,6 @@ fun formatQuantityText(
 
 @Composable
 private fun IngredientsList(
-    recipeId: String,
     recipeState: RecipeState,
     ingredientItems: List<Ingredient>,
     unitItems: List<UnitModel>,
@@ -287,13 +240,7 @@ private fun IngredientsList(
     onRemove: (String) -> Unit,
 ) {
     if (recipeState.assignedIngredientIds.isEmpty()) {
-        Text(
-            text = "No ingredients added yet",
-            style = MaterialTheme.typography.bodyMedium,
-            fontStyle = FontStyle.Italic,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
+        EmptyHint("No ingredients added yet")
         return
     }
 
@@ -331,44 +278,12 @@ private fun IngredientsList(
 }
 
 @Composable
-private fun PlaceholderSection(
-    title: String,
-    emptyMessage: String,
-    actionLabel: String,
-    isEditMode: Boolean
-) {
-    Card {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = title, style = MaterialTheme.typography.titleLarge)
-
-                if (isEditMode) {
-                    OutlinedButton(
-                        onClick = { /* TODO: Implement later */ },
-                        enabled = false
-                    ) {
-                        Text(actionLabel)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = emptyMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                fontStyle = FontStyle.Italic,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-    }
+private fun EmptyHint(message: String) {
+    Text(
+        text = message,
+        style = MaterialTheme.typography.bodyMedium,
+        fontStyle = FontStyle.Italic,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
 }
